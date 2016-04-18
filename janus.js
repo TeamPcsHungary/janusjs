@@ -1711,7 +1711,7 @@ function Janus(gatewayCallbacks) {
 			pluginHandle.mediaState(json["type"], json["receiving"]);
 		} else if(json["janus"] === "error") {
 			// Oops, something wrong happened
-			Janus.error("Ooops: " + json["error"].code + " " + json["error"].reason);	// FIXME
+			// Janus.error("Ooops: " + json["error"].code + " " + json["error"].reason);	// FIXME
 			var transaction = json["transaction"];
 			if(transaction !== null && transaction !== undefined) {
 				var reportSuccess = transactions[transaction];
@@ -1897,17 +1897,29 @@ function Janus(gatewayCallbacks) {
 
 	// Private method to destroy a session
 	function destroySession(callbacks, syncRequest) {
+                var cleanupWs = function() {
+                  if (ws)
+                  {
+                    ws.close();
+                    connected = false;
+                    sessionId = null;
+                    delete(Janus.initDone);
+
+                  }
+                }
 		syncRequest = (syncRequest === true);
 		Janus.log("Destroying session " + sessionId + " (sync=" + syncRequest + ")");
 		callbacks = callbacks || {};
 		// FIXME This method triggers a success even when we fail
 		callbacks.success = (typeof callbacks.success == "function") ? callbacks.success : jQuery.noop;
 		if(!connected) {
+                        cleanupWs();
 			Janus.warn("Is the gateway down? (connected=false)");
 			callbacks.success();
 			return;
 		}
 		if(sessionId === undefined || sessionId === null) {
+                        cleanupWs();
 			Janus.warn("No session to destroy");
 			callbacks.success();
 			gatewayCallbacks.destroyed();
@@ -1950,7 +1962,7 @@ function Janus(gatewayCallbacks) {
 			};
 			var onUnbindError = function(event) {
 				unbindWebSocket();
-				callbacks.error("Failed to destroy the gateway: Is the gateway down?");
+				// callbacks.error("Failed to destroy the gateway: Is the gateway down?");
 				gatewayCallbacks.destroyed();
 			};
 
@@ -1958,6 +1970,7 @@ function Janus(gatewayCallbacks) {
 			ws.addEventListener('error', onUnbindError);
 
 			ws.send(JSON.stringify(request));
+                        cleanupWs();
 			return;
 		}
 		$.ajax({
