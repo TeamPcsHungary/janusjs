@@ -1487,8 +1487,8 @@ Janus.init = function(options) {
 		}
                 // CUSTOM MOD
 		// addJsList(["adapter.js","jquery.min.js"]);
+	        options.callback();
 	}
-	options.callback();
 };
 
 // Helper method to check whether WebRTC is supported by this browser
