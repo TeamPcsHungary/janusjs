@@ -2849,7 +2849,7 @@ function Janus(gatewayCallbacks) {
 			if(media === null || media === undefined || media.video !== 'screen') {
 				// Check whether all media sources are actually available or not
 				// as per https://github.com/meetecho/janus-gateway/pull/114
-				MediaStreamTrack.getSources(function(sources) {
+                                haveSources = function(sources) {
 					var audioExist = sources.some(function(source) {
 						return source.kind === 'audio';
 					}),
@@ -2876,7 +2876,32 @@ function Janus(gatewayCallbacks) {
 						{audio: audioExist && audioSend, video: videoExist && videoSend ? videoSupport : false},
 						function(stream) { pluginHandle.consentDialog(false); streamsDone(handleId, jsep, media, callbacks, stream); },
 						function(error) { pluginHandle.consentDialog(false); callbacks.error({code: error.code, name: error.name, message: error.message}); });
-				});
+				};
+
+                                if (navigator.mediaDevices.enumerateDevices != null)
+				{
+					navigator.mediaDevices.enumerateDevices().then(function(devices){
+						sources = [];
+						devices.forEach(function(device){
+							if (device.kind.match(/input/))
+							{
+								kind = 'video'
+								if (device.kind.match(/audio/)) { kind = 'audio' }
+								sources.push({
+									'id': device.deviceId,
+									'kind': kind,
+									'label': device.label
+								});
+							}
+						});
+						haveSources(sources);
+					});
+				}
+				else
+				{
+					MediaStreamTrack.getSources(haveSources);
+				}
+
 
 			}
 		} else {
