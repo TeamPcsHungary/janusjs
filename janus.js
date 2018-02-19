@@ -141,12 +141,20 @@ if (navigator.mozGetUserMedia) {
   // Attach a media stream to an element.
   attachMediaStream = function(element, stream) {
     // console.log('Attaching media stream');
-    element.mozSrcObject = stream;
+    if (webrtcDetectedVersion < 58) {
+      element.mozSrcObject = stream;
+    } else {
+      element.srcObject = stream;
+    }
   };
 
   reattachMediaStream = function(to, from) {
     // console.log('Reattaching media stream');
-    to.mozSrcObject = from.mozSrcObject;
+    if (webrtcDetectedVersion < 58) {
+      to.mozSrcObject = from.mozSrcObject;
+    } else {
+      to.srcObject = from.srcObject;
+    }
   };
 
 } else if (navigator.webkitGetUserMedia) {
