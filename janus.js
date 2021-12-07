@@ -1335,7 +1335,8 @@ function requestUserMedia(constraints) {
   });
 }
 
-window.RTCPeerConnection = RTCPeerConnection;
+if (!window.RTCPeerConnection)
+  window.RTCPeerConnection = RTCPeerConnection;
 window.getUserMedia = getUserMedia;
 window.attachMediaStream = attachMediaStream;
 window.reattachMediaStream = reattachMediaStream;
