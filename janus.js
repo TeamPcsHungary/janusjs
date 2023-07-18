@@ -61,17 +61,23 @@ if (navigator.mozGetUserMedia) {
     parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
 
   // The RTCPeerConnection object.
-  RTCPeerConnection = function(pcConfig, pcConstraints) {
-    // .urls is not supported in FF yet.
-    maybeFixConfiguration(pcConfig);
-    return new mozRTCPeerConnection(pcConfig, pcConstraints);
-  };
+  if (!(RTCPeerConnection = window.RTCPeerConnection)) {
+    RTCPeerConnection = function(pcConfig, pcConstraints) {
+      // .urls is not supported in FF yet.
+      maybeFixConfiguration(pcConfig);
+      return new mozRTCPeerConnection(pcConfig, pcConstraints);
+    };
+  }
 
   // The RTCSessionDescription object.
-  window.RTCSessionDescription = mozRTCSessionDescription;
+  if (!window.RTCSessionDescription) {
+    window.RTCSessionDescription = mozRTCSessionDescription;
+  }
 
   // The RTCIceCandidate object.
-  window.RTCIceCandidate = mozRTCIceCandidate;
+  if (!window.RTCIceCandidate) {
+    window.RTCIceCandidate = mozRTCIceCandidate;
+  }
 
   // getUserMedia shim (only difference is the prefix).
   // Code from Adam Barth.
